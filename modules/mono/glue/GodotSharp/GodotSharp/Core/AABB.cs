@@ -1,5 +1,7 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 
 namespace Godot
 {
@@ -9,11 +11,33 @@ namespace Godot
     /// </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct AABB : IEquatable<AABB>
+    public partial struct AABB : IEquatable<AABB>
     {
+        static AABB()
+        {
+            if (
+#if REAL_T_IS_DOUBLE
+                Avx.IsSupported
+#else
+                Sse41.IsSupported
+#endif
+            )
+            {
+                IntersectsSegmentFunc = IntersectsSegmentSimd;
+                IntersectionFunc = IntersectionSimd;
+            }
+            else
+            {
+                IntersectsSegmentFunc = IntersectsSegmentSoftware;
+                IntersectionFunc = IntersectionSoftware;
+            }
+        }
+
         private Vector3 _position;
         private Vector3 _size;
 
+        private static Func<AABB, Vector3, Vector3, bool> IntersectsSegmentFunc;
+        private static Func<AABB, AABB, AABB> IntersectionFunc;
         /// <summary>
         /// Beginning corner. Typically has values lower than <see cref="End"/>.
         /// </summary>
@@ -400,8 +424,14 @@ namespace Godot
         /// <returns>The clipped <see cref="AABB"/>.</returns>
         public AABB Intersection(AABB with)
         {
-            Vector3 srcMin = _position;
-            Vector3 srcMax = _position + _size;
+            return IntersectionFunc(this, with);
+        }
+
+        [SkipLocalsInit]
+        private static AABB IntersectionSoftware(AABB dis, AABB with)
+        {
+            Vector3 srcMin = dis._position;
+            Vector3 srcMax = dis._position + dis._size;
             Vector3 dstMin = with._position;
             Vector3 dstMax = with._position + with._size;
 
@@ -533,6 +563,12 @@ namespace Godot
         /// </returns>
         public bool IntersectsSegment(Vector3 from, Vector3 to)
         {
+            return IntersectsSegmentFunc(this, from, to);
+        }
+
+        [SkipLocalsInit]
+        private static bool IntersectsSegmentSoftware(AABB dis, Vector3 from, Vector3 to)
+        {
             real_t min = 0f;
             real_t max = 1f;
 
@@ -540,8 +576,8 @@ namespace Godot
             {
                 real_t segFrom = from[i];
                 real_t segTo = to[i];
-                real_t boxBegin = _position[i];
-                real_t boxEnd = boxBegin + _size[i];
+                real_t boxBegin = dis._position[i];
+                real_t boxEnd = boxBegin + dis._size[i];
                 real_t cmin, cmax;
 
                 if (segFrom < segTo)
