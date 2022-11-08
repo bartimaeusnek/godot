@@ -50,6 +50,7 @@
   <!-- Sources -->
   <ItemGroup>
     <Compile Include="Core\AABB.cs" />
+    <Compile Include="Core\AABB.SIMD.cs" />
     <Compile Include="Core\Bridge\GodotSerializationInfo.cs" />
     <Compile Include="Core\Bridge\MethodInfo.cs" />
     <Compile Include="Core\Callable.generics.cs" />

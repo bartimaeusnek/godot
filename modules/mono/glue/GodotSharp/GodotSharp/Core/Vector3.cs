@@ -1,5 +1,8 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 namespace Godot
 {
@@ -1069,5 +1072,35 @@ namespace Godot
         {
             return $"({x.ToString(format)}, {y.ToString(format)}, {z.ToString(format)})";
         }
+
+        /// <summary>
+        /// Loads this <see cref="Vector3"/> to a <see cref="Vector128"/> or <see cref="Vector256"/> register.
+        /// </summary>
+        /// <returns>An appropriate SIMD Vector of this vector with the 4th element set to 0.</returns>
+        [SkipLocalsInit]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe
+#if REAL_T_IS_DOUBLE
+            Vector256<real_t>
+#else
+            Vector128<real_t>
+#endif
+            ToSIMDVector()
+        {
+#if REAL_T_IS_DOUBLE
+            real_t* ptr = (real_t*) Unsafe.AsPointer(ref this);
+            Vector256<real_t> vec = (ulong) ptr % 32 == 0 ? Avx.LoadAlignedVector256(ptr) : Avx.LoadVector256(ptr);
+            return Avx.And(vec, initVector);
+#else
+            real_t* ptr = (real_t*) Unsafe.AsPointer(ref this);
+            Vector128<real_t> vec = (ulong) ptr % 16 == 0 ? Sse.LoadAlignedVector128(ptr) : Sse.LoadVector128(ptr);
+            return Sse.And(vec, initVector);
+#endif
+        }
+#if REAL_T_IS_DOUBLE
+        private static Vector256<real_t> initVector = Vector256.Create(-1L, -1L, -1L, 0L).AsDouble();
+#else
+        private static Vector128<real_t> initVector = Vector128.Create(-1, -1, -1, 0).AsSingle();
+#endif
     }
 }
