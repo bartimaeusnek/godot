@@ -23,7 +23,7 @@ public partial struct AABB
     }
 
     [SkipLocalsInit]
-    private static AABB IntersectionSimd(AABB dis, AABB with)
+    internal static AABB IntersectionSimd(AABB dis, AABB with)
     {
         Vector256<real_t> srcMinVec = dis._position.ToSIMDVector();
         Vector256<real_t> srcSizeVec = dis._size.ToSIMDVector();
@@ -49,7 +49,7 @@ public partial struct AABB
         unsafe
         {
             real_t[] aabb = new real_t[7];
-            real_t* aabbPtr = (real_t*) Unsafe.AsPointer(ref aabb);
+            real_t* aabbPtr = (real_t*) Unsafe.AsPointer(ref aabb[0]);
             Avx.Store(aabbPtr, min);
             Avx.Store(aabbPtr + 3, maxMinusMin);
             return *(AABB*) aabbPtr; //we are returning ByValue here
@@ -59,7 +59,7 @@ public partial struct AABB
     private static Vector256<real_t> _One = Vector256.Create(1D, 1D, 1D, 0D);
 
     [SkipLocalsInit]
-    private static bool IntersectsSegmentSimd(AABB dis, Vector3 from, Vector3 to)
+    internal static bool IntersectsSegmentSimd(AABB dis, Vector3 from, Vector3 to)
     {
         Vector256<real_t> segFromVec = from.ToSIMDVector();
         Vector256<real_t> segToVec = to.ToSIMDVector();
@@ -163,7 +163,7 @@ public partial struct AABB
     }
 #else
     [SkipLocalsInit]
-    private static AABB IntersectionSimd(AABB dis, AABB with)
+    internal static AABB IntersectionSimd(AABB dis, AABB with)
     {
         Vector128<real_t> srcMinVec = dis._position.ToSIMDVector();
         Vector128<real_t> srcSizeVec = dis._size.ToSIMDVector();
@@ -189,7 +189,7 @@ public partial struct AABB
         unsafe
         {
             real_t[] aabb = new real_t[7];
-            real_t* aabbPtr = (real_t*) Unsafe.AsPointer(ref aabb);
+            real_t* aabbPtr = (real_t*) Unsafe.AsPointer(ref aabb[0]);
             Sse.Store(aabbPtr, minVec);
             Sse.Store(aabbPtr + 3, maxMinusMinVec);
             return *(AABB*) aabbPtr; //we are returning ByValue here
@@ -199,7 +199,7 @@ public partial struct AABB
     private static Vector128<real_t> _One = Vector128.Create(1f, 1f, 1f, 0f);
 
     [SkipLocalsInit]
-    private static bool IntersectsSegmentSimd(AABB dis, Vector3 from, Vector3 to)
+    internal static bool IntersectsSegmentSimd(AABB dis, Vector3 from, Vector3 to)
     {
         Vector128<real_t> segFromVec = from.ToSIMDVector();
         Vector128<real_t> segToVec = to.ToSIMDVector();

@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net6.0</TargetFramework>
-        <LangVersion>10</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-        <!-- To generate the .runtimeconfig.json file-->
-        <EnableDynamicLoading>true</EnableDynamicLoading>
         <Configurations>Debug;Release;Release double;Debug double</Configurations>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
@@ -20,6 +17,10 @@
       <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
       <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\GodotSharp\GodotSharp.csproj" />

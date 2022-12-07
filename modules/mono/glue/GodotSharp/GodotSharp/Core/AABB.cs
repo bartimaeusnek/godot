@@ -428,7 +428,7 @@ namespace Godot
         }
 
         [SkipLocalsInit]
-        private static AABB IntersectionSoftware(AABB dis, AABB with)
+        internal static AABB IntersectionSoftware(AABB dis, AABB with)
         {
             Vector3 srcMin = dis._position;
             Vector3 srcMax = dis._position + dis._size;
@@ -567,7 +567,7 @@ namespace Godot
         }
 
         [SkipLocalsInit]
-        private static bool IntersectsSegmentSoftware(AABB dis, Vector3 from, Vector3 to)
+        internal static bool IntersectsSegmentSoftware(AABB dis, Vector3 from, Vector3 to)
         {
             real_t min = 0f;
             real_t max = 1f;

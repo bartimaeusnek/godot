@@ -14,6 +14,8 @@
 
     <!-- Disabled temporarily as it pollutes the warnings, but we need to document public APIs. -->
     <NoWarn>CS1591</NoWarn>
+    <Configurations>Debug;Release;Release double;Debug double</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <Description>Godot C# Core API.</Description>
@@ -40,6 +42,21 @@
     <DefineConstants>$(DefineConstants);GODOT</DefineConstants>
     <DefineConstants Condition=" '$(GodotFloat64)' == 'true' ">REAL_T_IS_DOUBLE;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>TRACE;GODOT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>TRACE;GODOT</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release double' ">
+    <DefineConstants>TRACE;GODOT;REAL_T_IS_DOUBLE</DefineConstants>
+    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug double' ">
+    <DefineConstants>TRACE;GODOT;REAL_T_IS_DOUBLE</DefineConstants>
+    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ReflectionAnalyzers" Version="0.1.22-dev" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
     <!--PackageReference Include="IDisposableAnalyzers" Version="3.4.13" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" /-->
@@ -50,6 +67,9 @@
   <!-- Sources -->
   <ItemGroup>
     <Compile Include="Core\AABB.cs" />
+    <Compile Include="Core\AABB.SIMD.cs">
+      <DependentUpon>AABB.cs</DependentUpon>
+    </Compile>
     <Compile Include="Core\Bridge\GodotSerializationInfo.cs" />
     <Compile Include="Core\Bridge\MethodInfo.cs" />
     <Compile Include="Core\Callable.generics.cs" />
